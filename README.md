@@ -1,5 +1,5 @@
 # 4 4 TrueCry Miner (Linux Edition)
-[![docker-release](https://github.com/FM1337/44truecry-miner-docker/actions/workflows/build-image.yml/badge.svg)](https://github.com/FM1337/44truecry-miner-docker/actions/workflows/build-image.yml)
+[![build-image](https://github.com/FM1337/44truecry-miner-docker/actions/workflows/build-image.yml/badge.svg)](https://github.com/FM1337/44truecry-miner-docker/actions/workflows/build-image.yml)
 
 This is a working linux version of [TheZZAZZGlitch](https://www.youtube.com/c/TheZZAZZGlitch)'s 4 4 TrueCry
 

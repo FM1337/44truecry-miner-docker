@@ -25,14 +25,12 @@ COPY ./helpers/bgb.ini /44cry/helpers/bgb.ini
 COPY ./helpers/demo.dem /44cry/helpers/demo.dem
 COPY ./helpers/state.sna /44cry/helpers/state.sna
 COPY ./helpers/base.sna /44cry/helpers/base.sna
-COPY ./helpers/temp_state.sna /44cry/helpers/temp_state.sna
 COPY ./helpers/yellow.sav /44cry/helpers/yellow.sav
 COPY ./helpers/generator/corruption_generator.cpp /44cry/helpers/generator/corruption_generator.cpp
 COPY ./helpers/generator/sram.cpp /44cry/helpers/generator/sram.cpp
 COPY ./helpers/generator/behavior_c6.txt /44cry/helpers/generator/behavior_c6.txt
 COPY ./helpers/generator/behavior_dc.txt /44cry/helpers/generator/behavior_dc.txt
 COPY ./helpers/generator/sram_start.dmp /44cry/helpers/generator/sram_start.dmp
-COPY ./helpers/generator/sram_final.dmp /44cry/helpers/generator/sram_final.dmp
 COPY ./run.sh /44cry/run.sh
 
 # Build the generator

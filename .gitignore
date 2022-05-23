@@ -6,3 +6,4 @@ results/
 *.bmp
 corruption_generator
 temp_state.sna
+sram_final.dmp
