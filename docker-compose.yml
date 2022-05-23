@@ -1,0 +1,10 @@
+ version: "3.7"
+
+ services:
+   miner:
+     image: fmcore/44truecryminer
+     volumes:
+       - ./results:/44cry/results
+       - ./yellow.gbc:/44cry/helpers/yellow.gbc
+       - ${DOTENV:-/dev/null}:/44cry/.env
+

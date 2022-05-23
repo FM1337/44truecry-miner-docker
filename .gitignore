@@ -1,0 +1,8 @@
+*.gbc
+.*exe
+.env
+bgb.exe
+results/
+*.bmp
+corruption_generator
+temp_state.sna
