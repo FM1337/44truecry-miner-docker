@@ -61,7 +61,7 @@ cmdline = [
 ]
 
 print("==============================================================")
-print("             THEZZAZZGLITCH'S TRUECRYCOIN MINER (LINUX EDITION)")
+print("     THEZZAZZGLITCH'S TRUECRYCOIN MINER (LINUX EDITION)       ")
 print("==============================================================")
 print("\"Truecrycoin\" is a distributed computing project of the")
 print("Pokemon glitching community, attempting to reproduce some rare")
