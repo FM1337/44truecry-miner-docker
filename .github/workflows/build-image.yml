@@ -1,8 +1,8 @@
-name: docker-release
+name: build-image
 on:
   push:
     paths-ignore: [".gitignore", "**/*.md"]
-    branches: [master]
+    branches: [master, main]
     tags: ["*"]
 
 jobs:
