@@ -4,35 +4,55 @@ import random
 import time
 import requests
 import shutil
+import base64
 from dotenv import load_dotenv
 from discord_webhook import DiscordWebhook
+
 
 def random_corruption_sequence():
     return [str(random.randrange(1, 200))
             for i in range(0, random.randrange(2, 15))]
 
+
 def pushover_notify(cs, sf):
     if (os.getenv("PUSHOVER_TOKEN") is not None and os.getenv("PUSHOVER_USER_KEY") is not None):
-            # If you have pushover's vars in the env, then we can notify on success
-            requests.post("https://api.pushover.net/1/messages.json", data = {
+        # If you have pushover's vars in the env, then we can notify on success
+        requests.post("https://api.pushover.net/1/messages.json", data={
             "token": os.getenv("PUSHOVER_TOKEN"),
             "user": os.getenv("PUSHOVER_USER_KEY"),
             "message": "A truecry result was found, corruption sequence is %s\nState file can be found under %s" % (cs, sf)
-            }, 
-            files = {
-                "attachment": ("image.bmp", open("helpers/temp_screen.bmp", "rb"), "image/bmp")
-            })
+        },
+            files={
+            "attachment": ("image.bmp", open("helpers/temp_screen.bmp", "rb"), "image/bmp")
+        })
+
 
 def discord_notify(cs, sf):
     if(os.getenv("DISCORD_WEBHOOK") is not None):
-        message = "Oh hey, a non-`rst 38`-crash truecry result has been found!\nCorruption Sequence is `%s`\nAttached is both the save state file and emulator image from the result" % (cs)
-        webhook = DiscordWebhook(url=os.getenv("DISCORD_WEBHOOK"), content=message)
+        message = "Oh hey, a non-`rst 38`-crash truecry result has been found!\nCorruption Sequence is `%s`\nAttached is both the save state file and emulator image from the result" % (
+            cs)
+        webhook = DiscordWebhook(url=os.getenv(
+            "DISCORD_WEBHOOK"), content=message)
         with open("./results/%s" % (sf), "rb") as f:
             webhook.add_file(file=f.read(), filename=sf)
         with open("./helpers/temp_screen.bmp", "rb") as f:
             webhook.add_file(file=f.read(), filename="emulator_screenshot.bmp")
         webhook.execute()
 
+
+def discord_error_notify(code, stdout, stderr):
+    if(os.getenv("DISCORD_WEBHOOK") is not None):
+        message = "It looks like BGB in the 44truecry-miner docker container returned a non-zero return code, this is unexpected, the code it returned was %d" % (
+            code)
+        webhook = DiscordWebhook(url=os.getenv(
+            "DISCORD_WEBHOOK"), content=message)
+        webhook.execute()
+        # We also want to send the output of the command to the discord channel
+        message = "The following is base64 encoded stdout and stderr from the miner:\n%s\n%s" % (
+            stdout, stderr)
+        webhook = DiscordWebhook(url=os.getenv(
+            "DISCORD_WEBHOOK"), content=message)
+        webhook.execute()
 
 
 load_dotenv()
@@ -44,7 +64,8 @@ demo_path = os.path.join("helpers", "demo.dem")
 output_screen_path = os.path.join("temp_screen.bmp")
 output_sna_path = os.path.join("helpers", "temp_state.sna")
 
-generator_path = "./corruption_generator" # os.path.join("helpers", "generator", "corruption_generator")
+# os.path.join("helpers", "generator", "corruption_generator")
+generator_path = "./corruption_generator"
 generator_output = os.path.join("helpers", "generator", "sram_final.dmp")
 generator_cwd = os.path.join("helpers", "generator")
 
@@ -95,9 +116,10 @@ t_start = time.time()
 while 1:
     corruption_sequence = random_corruption_sequence()
     print("\r%i iterations, %i successes (%.2f corruptions/min)".ljust(62)
-        % (total_counter, success_counter, hash_rate), end="")
+          % (total_counter, success_counter, hash_rate), end="")
     # generate the actual SRAM corruption from sequence
-    subprocess.call(executable=generator_path, args=corruption_sequence, cwd=generator_cwd, shell=True)
+    subprocess.call(executable=generator_path,
+                    args=corruption_sequence, cwd=generator_cwd, shell=True)
     # copy the SRAM corruption data into savestate
     with open(base_sna_path, "rb") as f:
         sna_data = bytearray(f.read())
@@ -110,14 +132,19 @@ while 1:
     with open(sna_path, "wb") as f:
         f.write(sna_data)
     # run the emulation
-    return_code = subprocess.call(cmdline)
-    if return_code != 0:
-        raise RuntimeError("bgb did not exit successfully")
+    output = subprocess.run(cmdline, capture_output=True, encoding="utf-8")
+    if output.returncode != 0:
+        # base64 encode the output of the command
+        stdout = base64.b64encode(output.stdout).decode("utf-8")
+        stderr = base64.b64encode(output.stderr).decode("utf-8")
+        discord_error_notify(output.returncode, stdout, stderr)
+        continue
     # check the resulting state
     with open(output_sna_path, "rb") as f:
         sna_data = f.read()
     if sna_data.find(b"PC\x00\x02\x00\x00\x00\x38\x00") == -1:
-        temp_file_name = "success_%i_%i_%f.sna" % (total_counter, random.randrange(1, 100000), time.time())
+        temp_file_name = "success_%i_%i_%f.sna" % (
+            total_counter, random.randrange(1, 100000), time.time())
         shutil.copyfile(output_sna_path, "./results/%s" % (temp_file_name))
         print("")
         print("==============================================================")
@@ -135,7 +162,8 @@ while 1:
         print("copied to %s." % temp_file_name)
         print("==============================================================")
         success_counter += 1
-        pushover_notify(":".join(corruption_sequence), "./results/%s" % (temp_file_name))
+        pushover_notify(":".join(corruption_sequence),
+                        "./results/%s" % (temp_file_name))
         discord_notify(":".join(corruption_sequence), temp_file_name)
     # update counters
     total_counter += 1
